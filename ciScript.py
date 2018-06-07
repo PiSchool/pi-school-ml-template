@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Continuous integration script to interact with pip module 
 """
