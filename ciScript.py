@@ -13,6 +13,7 @@ import json
 import modelFacade
 import awsLogger
 import argparse
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--awsId", help="the aws access key id to use")
@@ -61,7 +62,10 @@ def main(args):
 
     print("config: ", config)
     # call awsLogger
-    awsLogger.logAndPush(makeLine(), config)
+    r = awsLogger.logAndPush(makeLine(), config)
+    print(r)
+    if not(r):
+        sys.exit('Could not push log file to s3')
     return
 
 
