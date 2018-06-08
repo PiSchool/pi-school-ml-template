@@ -105,3 +105,9 @@ venv.bak/
 
 # log files
 *.log
+
+models/*
+data/*
+
+.DS_Store
+.datahash

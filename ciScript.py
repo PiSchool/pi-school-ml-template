@@ -10,10 +10,15 @@ __license__ = "MIT"
 import datetime
 import subprocess
 import json
-import modelFacade
 import awsLogger
 import argparse
 import sys
+
+import training
+import logger
+
+log = logger.getLogger()
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--awsId", help="the aws access key id to use")
@@ -22,7 +27,7 @@ parser.add_argument("--projectId", help="the id of the project to work with")
 parser.add_argument(
     '--rest', help="all other arguments necessary as a json object, for exemple  \"{\\\"bucketName\\\":\\\"jenkins-pischool\\\"}\"")
 args = parser.parse_args()
-print("args:", args)
+log.info(["args:", args])
 
 restArgs = {}
 if args.rest:
@@ -36,17 +41,20 @@ def makeLine():
     # gather values
     toLog = {
         "timestamp": datetime.datetime.utcnow().strftime('%Y %m %d - %H:%M:%S'),
-        "label": subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8"),
-        "metricHash": modelFacade.getSingleMetricHash(),
-        "singlePerformanceMetric": modelFacade.predict(),
-        "auxiliaryPerformanceMetrics": modelFacade.getAuxiliaxyMetrics()
+        "gitHash": subprocess.check_output(["git", "rev-parse", "HEAD"]).strip().decode("utf-8"),
+
     }
+    metrics = training.test()
+    toLog.update(metrics)
+    toLog["canTrain"] = training.proof_of_training()
+
     return toLog
 
 
 def main(args):
     """ This method is called when you run this file on the command line"""
-    print("start main")
+    log.info("start main")
+
     config = {}
     if args.awsId is not None:
         config["awsId"] = args.awsId
@@ -60,13 +68,12 @@ def main(args):
     if not(restArgs == {}):
         config = {**config, **restArgs}
 
-    print("config: ", config)
+    log.info(["config: ", config])
     # call awsLogger
     r = awsLogger.logAndPush(makeLine(), config)
     print(r)
     if not(r):
         sys.exit('Could not push log file to s3')
-    return
 
 
 if __name__ == "__main__":

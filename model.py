@@ -16,28 +16,28 @@
 
 """
 This module contains all the logic related to the actual model.
-In this example, we use a neural network with one hidden layer.
+In this example, we use a random forest regressor.
 
-Note the logic: a general class for building several types of networks,
+Note the logic: a general class for building several types of models,
 and one or more functions to build "standard" configurations. The functions
 can be used to define common choices for the hyper-parameters and to make
 experiments more scalable / repeatable.
 """
 
-import tensorflow as tf
+from sklearn.ensemble import RandomForestRegressor
 
-class SimpleNetwork(tf.keras.Model):
+
+class SimpleModel(RandomForestRegressor):
     """
     We use tf.layers here.
     """
-    def __init__(self, hidden_size=10, output_size=3):
-        super(SimpleNetwork, self).__init__()
-        self.hid = tf.layers.Dense(hidden_size, activation=tf.nn.relu)
-        self.out = tf.layers.Dense(output_size)
-    
-    def call(self, x):
-        return self.out(self.hid(x))
+
+    def __init__(self, random_state=42,  n_estimators=10, max_features='auto'):
+        super(SimpleModel, self).__init__(
+            n_estimators=10, max_features='auto')
+        self.name = 'RandomForestRegressor'
+
 
 def build_simple_model():
-    
-    return SimpleNetwork()
+    regressor = SimpleModel()
+    return regressor

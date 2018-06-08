@@ -18,67 +18,96 @@
 This script should contain the actual training logic.
 """
 
-import data, model
 import numpy as np
-import tensorflow as tf
-import tensorflow.contrib.eager as tfe
+from sklearn.externals import joblib
+from sklearn.metrics import mean_squared_error, explained_variance_score, mean_squared_log_error
 
-def loss(model, xb, yb):
-    """
-    General function to compute the loss.
-    """
-    
-    return tf.losses.sparse_softmax_cross_entropy(logits=model(xb), labels=yb)
+import data
+import model
+import s3_helper
+import logger
 
-def train(model, train_it, val_it, epochs=1000):
+log = logger.getLogger()
+
+
+def train():
     """
     All the training logic should go here.
     """
-    
-    # Define the optimization algorithm
-    optimizer = tf.train.AdamOptimizer(learning_rate=0.01)
-    for epoch in range(epochs):
-        for xb, yb in train_it.shuffle(1000).batch(32):
-            
-            optimizer.minimize(lambda: loss(model, xb, yb), global_step=tf.train.get_or_create_global_step())
-    
-        # Validation step (generally goes at the end of every epoch)
-        if epoch % 100 == 0:
-            accuracy = tfe.metrics.Accuracy()
-            for xb, yb in val_it.batch(32):
-                # Accumulate accuracy over the validation set
-                accuracy(tf.argmax(model(tf.constant(xb)), axis=1), tf.constant(yb))
-            print('Epoch {}, validation accuracy is {}'.format(epoch, accuracy.result()))
+    log.info("start training model")
+    # Get data
+    X, Xtest, y, ytest = data.load_data(
+        seed=42, validation_set=False)
+
+    # Build the model
+    m = model.build_simple_model()
+    m.fit(X, y)
+    log.info("model trained")
+
+    log.info("save trained model and push to s3")
+    s3_helper.save_and_push_model(m)
 
 
-def test(model, test_it):
+def test():
     """
-    All test logic should go here.
+    All test logic should go here. This function is called by the continuous integration tool
+    to build a performance report per project
     """
-    
-    accuracy = tfe.metrics.Accuracy()
-    for xb, yb in test_it.batch(32):
-        # Accumulate accuracy over the test set
-        accuracy(tf.argmax(model(tf.constant(xb)), axis=1), tf.constant(yb))
-    print('Final test accuracy is {}'.format(accuracy.result()))
+    log.info("start testing model")
+    # get data
+    Xtrain, X, ytrain, y = data.load_data(
+        seed=42, validation_set=False)
+    # Build the model
+    m = model.build_simple_model()
+
+    test_metrics = {}
+    log.info("download model")
+    local_model = s3_helper.get_model(m.name)
+    m = joblib.load(local_model)
+    predicted_y = m.predict(X)
+    mse = mean_squared_error(y, predicted_y)
+
+    # add identifier of data used for the test
+    test_metrics["dataHash"] = data.get_id()
+
+    # gather the different metrics
+    test_metrics["rmse"] = np.sqrt(mse)
+    test_metrics["msle"] = mean_squared_log_error(y, predicted_y)
+    test_metrics["evs"] = explained_variance_score(y, predicted_y)
+
+    log.info(f"test metrics: {test_metrics}")
+    return test_metrics
+
+
+def proof_of_training():
+    """
+    This function is used by the continuous integration tool to build the performance report.
+    The idea is to make a quick train ( not complete and not optimized) to check that the trainning process is working
+    This shouldn't take more than 5 minute
+    """
+    log.info("start training model")
+    try:
+        # Get data
+        Xtrain, Xtest, ytrain, ytest = data.load_data(
+            seed=42, validation_set=False)
+        # shorten the training set to speed up the trainning process
+        X = Xtrain[:100, :]
+        y = ytrain[:100]
+        log.info([Xtrain.shape, ytrain.shape, X.shape, y.shape])
+        # Build the model
+        m = model.build_simple_model()
+        m.fit(X, y)
+        log.info("model trained")
+        return True
+    except Exception as e:
+        log.exception(f'there was an error during the training: {e}')
+        return False
+
 
 if __name__ == "__main__":
-    
-    # Run everything in eager execution
-    tfe.enable_eager_execution()
-    
-    # Important: set all PRNGs
-    np.random.seed(0)
-    tf.set_random_seed(0)
-    
-    # Build the model
-    model = model.build_simple_model()
-    
-    # Get iterators over data
-    train_it, val_it, test_it = data.load_data()
-    
+    log.info('start main')
+
     # Training logic
-    train(model, train_it, val_it)
-    
+    train()
     # Test logic
-    test(model, test_it)
+    test()
