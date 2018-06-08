@@ -27,7 +27,7 @@ parser.add_argument("--projectId", help="the id of the project to work with")
 parser.add_argument(
     '--rest', help="all other arguments necessary as a json object, for exemple  \"{\\\"bucketName\\\":\\\"jenkins-pischool\\\"}\"")
 args = parser.parse_args()
-log.info(["args:", args])
+# log.info(["args:", args])
 
 restArgs = {}
 if args.rest:
@@ -68,7 +68,7 @@ def main(args):
     if not(restArgs == {}):
         config = {**config, **restArgs}
 
-    log.info(["config: ", config])
+    # log.info(["config: ", config])
     # call awsLogger
     r = awsLogger.logAndPush(makeLine(), config)
     print(r)
