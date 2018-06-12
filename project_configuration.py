@@ -14,7 +14,7 @@ def get_config():
     # the other configuration entries
     config.update(
         {
-            "bucketName": "test-project-id",
+            "bucketName": "jenkins-pischool",
             "bucketDataPath": "data/",
             "localDataFile": "data/",
             "modelPath": "models/",
