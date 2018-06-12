@@ -27,8 +27,8 @@ def get_data():
         # it s recommended to configure your credential in aws-cli with aws configure
         # but if needed you can pass aws credential as described here.
         session = boto3.Session(
-            # aws_access_key_id=<your api key>,
-            # aws_secret_access_key=<your api secret>
+            aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY']
         )
         s3 = session.resource('s3')
         # download file
@@ -51,7 +51,10 @@ def hash_data():
     """ list data directory of the project on s3 and get a hash representing it. 
     This allow to detect changes in the dataset. """
     config = project_configuration.get_config()
-    session = boto3.Session()
+    session = boto3.Session(
+        aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+        aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY']
+    )
     s3 = session.resource('s3')
     hasher = hashlib.md5()
     [hasher.update(x.key.encode('utf-8')) for x in s3.Bucket(config["bucketName"]).objects.filter(
@@ -64,7 +67,8 @@ def hash_data():
 def get_model(model_name, ext='pkl'):
     """ Get the model you previously saved from s3 """
     config = project_configuration.get_config()
-    session = boto3.Session()
+    session = boto3.Session(aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])
     s3 = session.resource('s3')
     s3.Bucket(config["bucketName"]).download_file(
         f'{config["modelPath"]}{model_name}.{ext}', f'{config["modelLocalPath"]}{model_name}.{ext}')
@@ -78,7 +82,8 @@ def save_and_push_model(model, ext='pkl'):
     # dump your sklearn model into a file
     joblib.dump(model, local_file)
 
-    session = boto3.Session()
+    session = boto3.Session(aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+                            aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'])
     s3 = session.resource('s3')
     # upload model to s3
     data = open(local_file, 'rb')
