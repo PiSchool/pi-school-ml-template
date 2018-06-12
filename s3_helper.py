@@ -8,6 +8,7 @@ from sklearn.externals import joblib
 import project_configuration
 import logger
 log = logger.getLogger()
+log.info(["an id", os.environ['AWS_ACCESS_KEY_ID']])
 
 
 def get_data():
