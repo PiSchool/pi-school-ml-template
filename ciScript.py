@@ -68,7 +68,7 @@ def main(args):
     if not(restArgs == {}):
         config = {**config, **restArgs}
 
-    # log.info(["config: ", config])
+    log.info(["config: ", config])
     # call awsLogger
     r = awsLogger.logAndPush(makeLine(), config)
     print(r)
