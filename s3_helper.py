@@ -4,6 +4,7 @@ import os.path
 import hashlib
 import boto3
 from sklearn.externals import joblib
+import subprocess
 
 import project_configuration
 import logger
@@ -26,12 +27,16 @@ def get_data():
         log.info("data will be downloaded from s3")
         # it s recommended to configure your credential in aws-cli with aws configure
         # but if needed you can pass aws credential as described here.
-        session = boto3.Session()
-        s3 = session.resource('s3')
-        # download file
-        # in this particular case  we have 1 file.
-        s3.Bucket(config["bucketName"]).download_file(
-            f'{config["bucketDataPath"]}data-set.csv', f'{config["localDataFile"]}data-set.csv')
+        # aws s3 sync ./models s3://covisian-kpi-anomalies/models --profile pischool
+        s3SyncOutput = subprocess.check_output(
+            ["aws", "s3", "sync", f's3://{config["bucketName"]}/{config["bucketDataPath"]}', config["bucketDataPath"]]).strip().decode("utf-8")
+        log.info(["s3SyncOutput:", s3SyncOutput])
+        # session = boto3.Session()
+        # s3 = session.resource('s3')
+        # # download file
+        # # in this particular case  we have 1 file.
+        # s3.Bucket(config["bucketName"]).download_file(
+        #     f'{config["bucketDataPath"]}data-set.csv', f'{config["localDataFile"]}data-set.csv')
         # when we download data, we save in a file a hash representing the distant data directory
         # like this we do not download several time unchanged data.
         log.info(f'{current_hash} will be added to {config["dataHashFile"]}')
