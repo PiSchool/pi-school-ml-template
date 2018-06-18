@@ -4,7 +4,7 @@ import os.path
 import hashlib
 import boto3
 from sklearn.externals import joblib
-from awscli.clidriver import create_clidriver
+import subprocess
 
 import project_configuration
 import logger
@@ -28,9 +28,16 @@ def get_data():
         # it s recommended to configure your credential in aws-cli with aws configure
         # but if needed you can pass aws credential as described here.
         # aws s3 sync ./models s3://covisian-kpi-anomalies/models --profile pischool
-        aws_cli(['s3', 'sync',
-                 f's3://{config["bucketName"]}/{config["bucketDataPath"]}',
-                 config['bucketDataPath']])
+        if os.name == 'nt':
+            # windows use aws_cli method
+            aws_cli(['s3', 'sync',
+                     f's3://{config["bucketName"]}/{config["bucketDataPath"]}',
+                     config['bucketDataPath']])
+        else:
+            # unix use simply aws s3 sync
+            s3SyncOutput = subprocess.check_output(
+                ["aws", "s3", "sync", f's3://{config["bucketName"]}/{config["bucketDataPath"]}', config]).strip().decode("utf-8")
+            log.info(["s3SyncOutput:", s3SyncOutput])
         # session = boto3.Session()
         # s3 = session.resource('s3')
         # # download file
@@ -74,7 +81,7 @@ def get_model(model_name, ext='pkl'):
 
 
 def save_and_push_model(model, ext='pkl'):
-    """ save your model in a file and send it to s3 """
+    """ save you model in a file and send it to s3 """
     config = project_configuration.get_config()
     local_file = f'{config["modelLocalPath"]}{model.name}.{ext}'
     # dump your sklearn model into a file
@@ -89,6 +96,7 @@ def save_and_push_model(model, ext='pkl'):
 
 
 def aws_cli(*cmd):
+    from awscli.clidriver import create_clidriver
     " Use this to run AWS CLI commands "
     old_env = dict(os.environ)
     try:
