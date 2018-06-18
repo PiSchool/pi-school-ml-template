@@ -4,4 +4,3 @@ awsLogger==0.0.9
 pandas==0.23.0
 scikit_learn==0.19.1
 awscli==1.15.40
-arrow==0.12.1

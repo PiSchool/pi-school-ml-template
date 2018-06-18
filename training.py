@@ -27,9 +27,6 @@ import model
 import s3_helper
 import logger
 
-import arrow
-utc = arrow.utcnow()
-
 log = logger.getLogger()
 
 
