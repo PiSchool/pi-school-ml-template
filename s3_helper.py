@@ -8,7 +8,7 @@ import subprocess
 
 import project_configuration
 import logger
-log = logger.getLogger()
+log = logger.getLogger() 
 
 
 def get_data():
