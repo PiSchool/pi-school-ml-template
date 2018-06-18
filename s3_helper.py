@@ -4,6 +4,7 @@ import os.path
 import hashlib
 import boto3
 from sklearn.externals import joblib
+from awscli.clidriver import create_clidriver
 
 import project_configuration
 import logger
@@ -27,8 +28,8 @@ def get_data():
         # it s recommended to configure your credential in aws-cli with aws configure
         # but if needed you can pass aws credential as described here.
         # aws s3 sync ./models s3://covisian-kpi-anomalies/models --profile pischool
-        aws_cli(['s3', 'sync', \
-                 f's3://{config["bucketName"]}/{config["bucketDataPath"]}', \
+        aws_cli(['s3', 'sync',
+                 f's3://{config["bucketName"]}/{config["bucketDataPath"]}',
                  config['bucketDataPath']])
         # session = boto3.Session()
         # s3 = session.resource('s3')
@@ -85,8 +86,8 @@ def save_and_push_model(model, ext='pkl'):
     data = open(local_file, 'rb')
     s3.Bucket(config["bucketName"]).put_object(
         Key=f'{config["modelPath"]}{model.name}.{ext}', Body=data)
-    
-from awscli.clidriver import create_clidriver
+
+
 def aws_cli(*cmd):
     " Use this to run AWS CLI commands "
     old_env = dict(os.environ)
