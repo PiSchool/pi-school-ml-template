@@ -27,6 +27,9 @@ import model
 import s3_helper
 import logger
 
+# To be removed
+import brewer2mpl
+
 log = logger.getLogger()
 
 
@@ -46,7 +49,9 @@ def train():
 
     log.info("save trained model and push to s3")
     s3_helper.save_and_push_model(m)
-
+    
+    # To be removed
+    brewer2mpl.print_maps()
 
 def test():
     """
