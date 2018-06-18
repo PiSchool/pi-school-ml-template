@@ -4,7 +4,6 @@ import os.path
 import hashlib
 import boto3
 from sklearn.externals import joblib
-import subprocess
 
 import project_configuration
 import logger
@@ -28,9 +27,9 @@ def get_data():
         # it s recommended to configure your credential in aws-cli with aws configure
         # but if needed you can pass aws credential as described here.
         # aws s3 sync ./models s3://covisian-kpi-anomalies/models --profile pischool
-        s3SyncOutput = subprocess.check_output(
-            ["aws", "s3", "sync", f's3://{config["bucketName"]}/{config["bucketDataPath"]}', config["bucketDataPath"]]).strip().decode("utf-8")
-        log.info(["s3SyncOutput:", s3SyncOutput])
+        aws_cli(['s3', 'sync', \
+                 f's3://{config["bucketName"]}/{config["bucketDataPath"]}', \
+                 config['bucketDataPath']])
         # session = boto3.Session()
         # s3 = session.resource('s3')
         # # download file
@@ -74,7 +73,7 @@ def get_model(model_name, ext='pkl'):
 
 
 def save_and_push_model(model, ext='pkl'):
-    """ save you model in a file and send it to s3 """
+    """ save your model in a file and send it to s3 """
     config = project_configuration.get_config()
     local_file = f'{config["modelLocalPath"]}{model.name}.{ext}'
     # dump your sklearn model into a file
@@ -86,3 +85,24 @@ def save_and_push_model(model, ext='pkl'):
     data = open(local_file, 'rb')
     s3.Bucket(config["bucketName"]).put_object(
         Key=f'{config["modelPath"]}{model.name}.{ext}', Body=data)
+    
+from awscli.clidriver import create_clidriver
+def aws_cli(*cmd):
+    " Use this to run AWS CLI commands "
+    old_env = dict(os.environ)
+    try:
+
+        # Environment
+        env = os.environ.copy()
+        env['LC_CTYPE'] = u'en_US.UTF'
+        os.environ.update(env)
+
+        # Run awscli in the same process
+        exit_code = create_clidriver().main(*cmd)
+
+        # Deal with problems
+        if exit_code > 0:
+            raise RuntimeError('AWS CLI exited with code {}'.format(exit_code))
+    finally:
+        os.environ.clear()
+        os.environ.update(old_env)
