@@ -15,7 +15,7 @@ from sklearn.model_selection import cross_val_score
 
 def testPreprocessData():
     config = project_configuration.get_config()
-    df = pd.read_csv(config["localDataFile"])
+    df = pd.read_csv(config["localDataPath"])
     X, y = data.preprocess_data(df)
 
     meanX = X.mean(axis=0)

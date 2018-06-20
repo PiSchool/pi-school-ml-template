@@ -8,7 +8,7 @@ import subprocess
 
 import project_configuration
 import logger
-log = logger.getLogger() 
+log = logger.getLogger()
 
 
 def get_data():
@@ -36,14 +36,14 @@ def get_data():
         else:
             # unix use simply aws s3 sync
             s3SyncOutput = subprocess.check_output(
-                ["aws", "s3", "sync", f's3://{config["bucketName"]}/{config["bucketDataPath"]}', config]).strip().decode("utf-8")
+                ["aws", "s3", "sync", f's3://{config["bucketName"]}/{config["bucketDataPath"]}', config["localDataPath"]]).strip().decode("utf-8")
             log.info(["s3SyncOutput:", s3SyncOutput])
         # session = boto3.Session()
         # s3 = session.resource('s3')
         # # download file
         # # in this particular case  we have 1 file.
         # s3.Bucket(config["bucketName"]).download_file(
-        #     f'{config["bucketDataPath"]}data-set.csv', f'{config["localDataFile"]}data-set.csv')
+        #     f'{config["bucketDataPath"]}data-set.csv', f'{config["localDataPath"]}data-set.csv')
         # when we download data, we save in a file a hash representing the distant data directory
         # like this we do not download several time unchanged data.
         log.info(f'{current_hash} will be added to {config["dataHashFile"]}')
@@ -53,7 +53,7 @@ def get_data():
     else:
         log.info("data already existing localy, no need to download it again")
 
-    return f'{config["localDataFile"]}data-set.csv'
+    return f'{config["localDataPath"]}data-set.csv'
 
 
 def hash_data():
