@@ -1,11 +1,9 @@
 # Pi School Project Template
 
-This repository contains a template for structuring a machine learning project on GitHub.
+This repository contains a template for structuring a machine learning project on GitHub
+with a continuous integration procedure.
 
-We implement a neural network for classifying the Iris dataset, made from scratch
-with TensorFlow (in eager execution). For a basic tutorial on TF eager check out:
-
-    https://medium.com/tensorflow/building-an-iris-classifier-with-eager-execution-13c00a32adb0
+We implement a Random Forest model for classifying taken from sklearn.
 
 ## Installation
 
@@ -15,7 +13,15 @@ Clone the repository by running:
 git clone https://github.com/sscardapane/pi-school-ml-template.git
 ```
 
-Run training with:
+Inside config.json, specify the S3 bucket where data should be downloaded from.
+You should have command line authorization to access the bucket. To do this,
+install the AWS command line interface (CLI) and run
+
+```
+aws configure
+```
+
+Finally, run training with:
 
 ```
 python training.py
@@ -25,13 +31,17 @@ python training.py
 
 Following standard good practices, the code is organized in three major files:
 
-    * `data.py` contains all the code concerning data loading and preprocessing. It returns iterators that can be used to cycle over the data.
+    * `data.py` contains all the code concerning data loading and preprocessing. 
 
     * `model.py` contains the logic of the model.
 
     * `training.py` is a script implementing the actual training / test logic.
 
-Additional documentation and comments are provided inside the files.
+Additional documentation and comments are provided inside the files. Additionally auxiliary files are:
+
+    * `logger.py` is used to log information for the current training procedure.
+    
+    * `s3_helper.py` implements the logic for communicating with the S3 bucket.
 
 ## Other files
 
@@ -50,7 +60,3 @@ To generate a custom requirements.txt file for your project, install the `pipreq
 ```
 pipreqs /path/to/project
 ```
-
-## End of project
-
-In your requirements.txt, remove the dependency to awsLogger and delete ciScript.py
