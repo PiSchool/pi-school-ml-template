@@ -1,0 +1,12 @@
+{
+    "s3":{
+        "bucketName": "jenkins-pischool",
+        "bucketDataPath": "data/",
+        "modelPath": "models/"
+    },
+    "local":{
+        "localDataPath": "data/",
+        "modelPath": "models/",
+        "dataHashFile": ".datahash"
+    }
+}
