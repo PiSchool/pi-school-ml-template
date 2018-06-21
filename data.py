@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Simone Scardapane. All Rights Reserved.
+# Copyright 2018. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,14 +15,8 @@
 # limitations under the License.
 
 """
-This module contains all the code related to input loading and preprocessing.
-
-Exchange of data is done via three different iterators for:
-    * Training.
-    * Validation.
-    * Testing.
-
-We use RandomState to control the split in a fine way.
+This module contains all the logic relative to the data, including
+train / validation / test split.
 """
 
 import numpy as np
@@ -54,14 +48,8 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
     def transform(self, X):
         return X[self.attribute_names].values
 
-# from sklearn.datasets import load_iris
-# from sklearn.preprocessing import MinMaxScaler
-# from sklearn.model_selection import train_test_split
-
 
 data_identifier = {}
-
-
 def get_id():
     id = f'{data_identifier["hash"]}_{data_identifier["seed"]}_{data_identifier["test_set_ratio"]}'
     return id

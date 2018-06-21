@@ -12,7 +12,7 @@ log = logger.getLogger()
 
 
 def get_data():
-    """ Get your data from s3 if they does not already  exist localy"""
+    """ Get your data from s3 if they does not already  exist locally"""
     
     # Load configuration
     with open('config.json') as json_data_file:

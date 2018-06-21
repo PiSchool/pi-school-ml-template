@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2018 Simone Scardapane. All Rights Reserved.
+# Copyright 2018. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@ from sklearn.ensemble import RandomForestRegressor
 
 
 class SimpleModel(RandomForestRegressor):
-    """
-    We use tf.layers here.
-    """
 
     def __init__(self, random_state=42,  n_estimators=10, max_features='auto'):
         super(SimpleModel, self).__init__(
