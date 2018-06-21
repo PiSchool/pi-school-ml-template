@@ -3,7 +3,8 @@
 This repository contains a template for structuring a machine learning project on GitHub
 with a continuous integration procedure.
 
-We implement a Random Forest model for classifying taken from sklearn.
+We implement a Random Forest model taken from sklearn. Data and models are taken from a S3 repository
+on AWS.
 
 ## Installation
 
@@ -15,7 +16,7 @@ git clone https://github.com/sscardapane/pi-school-ml-template.git
 
 Inside config.json, specify the S3 bucket where data should be downloaded from.
 You should have command line authorization to access the bucket. To do this,
-install the AWS command line interface (CLI) and run
+install the AWS command line interface (CLI) and run:
 
 ```
 aws configure
@@ -37,7 +38,7 @@ Following standard good practices, the code is organized in three major files:
 
     * `training.py` is a script implementing the actual training / test logic.
 
-Additional documentation and comments are provided inside the files. Additionally auxiliary files are:
+More documentation and comments are provided inside the files. Additionally auxiliary files are:
 
     * `logger.py` is used to log information for the current training procedure.
     
